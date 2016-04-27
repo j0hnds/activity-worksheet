@@ -11,6 +11,9 @@ const dateSVC = require('../lib/date-service');
 const workbook = require('../lib/workbook');
 const async = require('async');
 const support = require('../lib/support');
+const dateFormat = require('dateformat');
+
+const DFormat = 'ddd dd-mmm-yyyy';
 
 program.
   version('1.0.0').
@@ -45,11 +48,10 @@ async.eachSeries(ranges, (range, cb) => {
    * We want to use the same range for both user groupings and 
    * account groupings
    */
-  console.log("From: %j to: %j", range.from, range.to);
   userActivity.groupByUser(range.from, range.to).
     then( (gStats) => { 
 
-      userActivityData.push([ range.from, range.to ]); 
+      userActivityData.push([ dateFormat(range.from, DFormat) ]); 
       userActivityData.push([ "User","Login","Logout","Book View","Page View", "Page PDF View","Page Download" ] );
       return userActivity.processUserStats(gStats).
         then( (userStats) => {
@@ -69,7 +71,7 @@ async.eachSeries(ranges, (range, cb) => {
     then( () => {
       return acctActivity.groupByAccount(range.from, range.to).
         then( (gStats) => {
-          acctActivityData.push([ range.from, range.to ]); 
+          acctActivityData.push([ dateFormat(range.from, DFormat) ]); 
           acctActivityData.push([ "Account","Login","Logout","Book View","Page View", "Page PDF View","Page Download" ] );
           return acctActivity.processAccountStats(gStats).
             then( (aStats) => {
