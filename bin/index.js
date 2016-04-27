@@ -27,7 +27,7 @@ program.
 
 var options = {
   auth: {
-    api_key: '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'
+    api_key: ''
   }
 };
 
