@@ -3,3 +3,6 @@ node_modules
 
 # Vim Junk
 *.swp
+
+# Test data
+*.xlsx

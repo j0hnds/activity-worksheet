@@ -16,6 +16,7 @@
   "dependencies": {
     "lodash": "^4.11.1",
     "mongoose": "^4.4.13",
-    "require-dir": "^0.3.0"
+    "require-dir": "^0.3.0",
+    "xlsx": "^0.8.0"
   }
 }
