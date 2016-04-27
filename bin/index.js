@@ -18,6 +18,8 @@ program.
   option('-r --recipients <recipients>', 'The emails to which the report should be delivered').
   parse(process.argv);
 
+const fileName = 'activity-' + program.today.toISOString() + '.xlsx';
+
 mongoose.connect(config.database.url);
 
 const userActivity = require('../lib/user-activity');
@@ -131,7 +133,7 @@ async.eachSeries(ranges, (range, cb) => {
       wb.Sheets[ws_weeklyActivityName] = ws_weeklyActivity;
 
       /* write file */
-      workbook.writeFile(wb, 'test.xlsx');
+      workbook.writeFile(wb, fileName);
       process.exit();
     }).
     catch( (err) => {
