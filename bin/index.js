@@ -4,6 +4,7 @@
  * Invoke this to generate the activity spreadsheets.
  */
 
+const program = require('commander');
 const mongoose = require('mongoose');
 require('../lib/bootstrap');
 const dateSVC = require('../lib/date-service');
@@ -11,13 +12,19 @@ const workbook = require('../lib/workbook');
 const async = require('async');
 const support = require('../lib/support');
 
+program.
+  version('1.0.0').
+  option('-t --today <today>', 'The value to use for today', dateSVC.parseDate, new Date()).
+  option('-r --recipients <recipients>', 'The emails to which the report should be delivered').
+  parse(process.argv);
+
 mongoose.connect(config.database.url);
 
 const userActivity = require('../lib/user-activity');
 const acctActivity = require('../lib/account-activity');
 const weeklyActivity = require('../lib/weekly-activity');
 
-var ranges = dateSVC.pastWeekRanges(new Date(2015, 9, 12, 0, 0, 0));
+var ranges = dateSVC.pastWeekRanges(program.today);
 
 var wb = new workbook.Workbook();
 var ws_userActivity = null;

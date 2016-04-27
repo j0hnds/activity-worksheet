@@ -16,6 +16,7 @@
   "dependencies": {
     "async": "^1.5.2",
     "bcrypt": "^0.8.6",
+    "commander": "^2.9.0",
     "lodash": "^4.11.1",
     "mongoose": "^4.4.13",
     "mongoose-unique-validator": "^1.0.2",
