@@ -14,8 +14,11 @@
   "author": "Dave Sieh",
   "license": "MIT",
   "dependencies": {
+    "async": "^1.5.2",
+    "bcrypt": "^0.8.6",
     "lodash": "^4.11.1",
     "mongoose": "^4.4.13",
+    "mongoose-unique-validator": "^1.0.2",
     "require-dir": "^0.3.0",
     "xlsx": "^0.8.0"
   }
