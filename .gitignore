@@ -1,0 +1,5 @@
+# NPM Junk
+node_modules
+
+# Vim Junk
+*.swp

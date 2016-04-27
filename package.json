@@ -1,0 +1,21 @@
+{
+  "name": "activity-worksheet",
+  "version": "1.0.0",
+  "description": "Script to generate and email activity worksheet.",
+  "main": "bin/index.js",
+  "scripts": {
+    "test": "tape test/**/*-test.js | faucet"
+  },
+  "keywords": [
+    "email",
+    "activity",
+    "worksheet"
+  ],
+  "author": "Dave Sieh",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^4.11.1",
+    "mongoose": "^4.4.13",
+    "require-dir": "^0.3.0"
+  }
+}
