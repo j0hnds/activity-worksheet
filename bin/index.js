@@ -13,6 +13,10 @@ const async = require('async');
 const support = require('../lib/support');
 const dateFormat = require('dateformat');
 
+// For mail
+var nodemailer = require('nodemailer');
+var sgTransport = require('nodemailer-sendgrid-transport');
+
 const DFormat = 'ddd dd-mmm-yyyy';
 
 program.
@@ -20,6 +24,14 @@ program.
   option('-t --today <today>', 'The value to use for today', dateSVC.parseDate, new Date()).
   option('-r --recipients <recipients>', 'The emails to which the report should be delivered').
   parse(process.argv);
+
+var options = {
+  auth: {
+    api_key: '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'
+  }
+};
+
+var transporter = nodemailer.createTransport(sgTransport(options));
 
 const fileName = 'activity-' + program.today.toISOString() + '.xlsx';
 
@@ -136,6 +148,43 @@ async.eachSeries(ranges, (range, cb) => {
 
       /* write file */
       workbook.writeFile(wb, fileName);
+
+      if (program.recipients) {
+        console.log("Sending attachment");
+        var mailOptions = {
+          from: 'vault@bighornimaging.com',
+          to: program.recipients.split(','),
+          subject: "Activity report for ",
+          html: "<p>The activity report.</p>",
+          attachments: [ { path: fileName } ]
+        };
+
+        console.log("The mail options: %j", mailOptions);
+
+        console.log("The transporter: %j", transporter);
+
+        console.log("sendMail: %j", typeof transporter.sendMail);
+
+        //transporter.sendMail(mailOptions).
+          //then( (info) => {
+            //console.log("Message: %j", info);
+            //process.exit();
+          //}).
+          //catch( (err) => {
+            //console.log("Error: %j", err);
+            //process.exit();
+          //});
+        transporter.sendMail(mailOptions, function(err, info) {
+          console.log("What the hell");
+          if (err) {
+            console.error("Right there: %j", err);
+            // process.exit();
+          }
+          console.log("Right here: %j", info);
+          // process.exit();
+        });
+      }
+
       process.exit();
     }).
     catch( (err) => {
