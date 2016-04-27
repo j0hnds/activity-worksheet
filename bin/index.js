@@ -15,17 +15,6 @@ mongoose.connect(config.database.url);
 const BillingActivity = require('../lib/billing-activity-model');
 const User = require('../lib/user-model');
 
-const eventTypeMap = [
-  'Invalid Event Type', // 0
-  'Login', // 1
-  'Logout', // 2
-  'Book View', // 3
-  'Page Thumbnail View', // 4
-  'Page View', // 5
-  'Page PDF View', // 6
-  'Page Download' 
-];
-
 const groupByUser = function(startTime, endTime) {
   console.log("From: %j to %j", startTime, endTime);
   return new Promise( (resolve, reject) => {
@@ -46,6 +35,29 @@ const groupByUser = function(startTime, endTime) {
   });
 };
 
+var updateStatsObj = function(statsObj, eventType, count) {
+  switch (eventType) {
+    case 1:
+      statsObj.login = count;
+      break;
+    case 2:
+      statsObj.logout = count;
+      break;
+    case 3:
+      statsObj.bookView = count;
+      break;
+    case 5:
+      statsObj.pageView = count;
+      break;
+    case 6:
+      statsObj.pdfView = count;
+      break;
+    case 7:
+      statsObj.pageDownload = count;
+      break;
+  }
+};
+
 var dates = dateSVC.pastWeekRanges(new Date(2015, 9, 8, 0, 0, 0));
 var ranges = [];
 for (var i=0; i<7; i++) {
@@ -64,17 +76,32 @@ async.eachSeries(ranges, (range, cb) => {
       console.log("From: %j to: %j", range.from, range.to);
 
       data.push([ range.from, range.to ]); 
-      data.push([ "User", "Event Type", "Total" ] );
+      data.push([ "User","Login","Logout","Book View","Page View", "Page PDF View","Page Download" ] );
+      var userStats = {};
       async.eachSeries(gStats, (gStat, cbStat) => {
         User.findOne({_id: gStat.user}).
           then( (user) => {
-            data.push([ user.name, eventTypeMap[gStat.eventType], gStat.total ]);
+            var userName = "**NO USER**";
+            if (user) { userName = user.name };
+            if (! userStats[userName]) {
+              userStats[userName] = {};
+            }
+            updateStatsObj(userStats[userName], gStat.eventType, gStat.total);
             cbStat();
           }).
           catch( cbStat );
       }, (err) => {
         if (err) {
           console.log(err);
+        }
+        for (var i in userStats) {
+          data.push([i, 
+                    userStats[i].login, 
+                    userStats[i].logout, 
+                    userStats[i].bookView, 
+                    userStats[i].pageView, 
+                    userStats[i].pdfView, 
+                    userStats[i].pageDownload]);
         }
         data.push([]);
 
@@ -98,8 +125,4 @@ async.eachSeries(ranges, (range, cb) => {
   workbook.writeFile(wb, 'test.xlsx');
   process.exit();
 });
-
-
-/* original data */
-// var data = [[1,2,3],[true, false, null, "sheetjs"],["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"], ["baz", null, "qux"]]
 
