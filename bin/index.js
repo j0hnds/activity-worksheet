@@ -15,16 +15,20 @@ mongoose.connect(config.database.url);
 
 const userActivity = require('../lib/user-activity');
 const acctActivity = require('../lib/account-activity');
+const weeklyActivity = require('../lib/weekly-activity');
 
-var ranges = dateSVC.pastWeekRanges(new Date(2015, 9, 8, 0, 0, 0));
+var ranges = dateSVC.pastWeekRanges(new Date(2015, 9, 12, 0, 0, 0));
 
 var wb = new workbook.Workbook();
 var ws_userActivity = null;
 var ws_userActivityName = "User Activity";
 var ws_acctActivity = null;
 var ws_acctActivityName = "Account Activity";
+var ws_weeklyActivity = null;
+var ws_weeklyActivityName = "Weekly Activity";
 var userActivityData = [];
 var acctActivityData = [];
+var weeklyActivityData = [];
 
 async.eachSeries(ranges, (range, cb) => {
 
@@ -84,18 +88,48 @@ async.eachSeries(ranges, (range, cb) => {
     process.exit();
   }
 
-  var ws_userActivity = workbook.sheet_from_array_of_arrays(userActivityData);
-  var ws_acctActivity = workbook.sheet_from_array_of_arrays(acctActivityData);
+  // Now, do the weekly stuff
+  weeklyActivity.groupByUser(ranges[0].from, ranges[6].to).
+    then( (wStats) => {
+      return weeklyActivity.processWeeklyStats(wStats).
+        then( (stats) => {
+          weeklyActivityData.push(["User","Book","County","Book View","Page View","Page PDF View","Page Download" ]);
+          for (var i in stats) {
+            var fields = i.split(',');
+            weeklyActivityData.push([
+              fields[0],
+              fields[1],
+              fields[2],
+              stats[i].bookView,
+              stats[i].pageView,
+              stats[i].pdfView,
+              stats[i].pageDownload]);
+          }
 
-  /* add worksheet to workbook */
-  wb.SheetNames.push(ws_userActivityName);
-  wb.Sheets[ws_userActivityName] = ws_userActivity;
+        });
+    }).
+    then( () => {
+      var ws_userActivity = workbook.sheet_from_array_of_arrays(userActivityData);
+      var ws_acctActivity = workbook.sheet_from_array_of_arrays(acctActivityData);
+      var ws_weeklyActivity = workbook.sheet_from_array_of_arrays(weeklyActivityData);
 
-  wb.SheetNames.push(ws_acctActivityName);
-  wb.Sheets[ws_acctActivityName] = ws_acctActivity;
+      /* add worksheet to workbook */
+      wb.SheetNames.push(ws_userActivityName);
+      wb.Sheets[ws_userActivityName] = ws_userActivity;
 
-  /* write file */
-  workbook.writeFile(wb, 'test.xlsx');
-  process.exit();
+      wb.SheetNames.push(ws_acctActivityName);
+      wb.Sheets[ws_acctActivityName] = ws_acctActivity;
+
+      wb.SheetNames.push(ws_weeklyActivityName);
+      wb.Sheets[ws_weeklyActivityName] = ws_weeklyActivity;
+
+      /* write file */
+      workbook.writeFile(wb, 'test.xlsx');
+      process.exit();
+    }).
+    catch( (err) => {
+      console.error(err);
+    });
+
 });
 
