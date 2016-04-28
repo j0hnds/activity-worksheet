@@ -11,10 +11,7 @@ const dateSVC = require('../lib/date-service');
 const workbook = require('../lib/workbook');
 const async = require('async');
 const dateFormat = require('dateformat');
-
-// For mail
-const nodemailer = require('nodemailer');
-const sgTransport = require('nodemailer-sendgrid-transport');
+const email = require('../lib/email');
 
 const DFormat = 'ddd dd-mmm-yyyy';
 
@@ -23,8 +20,6 @@ program.
   option('-t --today <today>', 'The value to use for today', dateSVC.parseDate, new Date()).
   option('-r --recipients <recipients>', 'The emails to which the report should be delivered').
   parse(process.argv);
-
-var transporter = nodemailer.createTransport(sgTransport(config.mail.options));
 
 const fileName = 'activity-' + program.today.toISOString() + '.xlsx';
 
@@ -151,15 +146,15 @@ async.eachSeries(ranges, (range, cb) => {
           attachments: [ { path: fileName } ]
         };
 
-        transporter.sendMail(mailOptions, function(err, info) {
-          console.log("What the hell");
-          if (err) {
-            console.error("Right there: %j", err);
+        email.deliver(mailOptions).
+          then( (info) => {
+            console.log("Email sent: %j", info);
             process.exit();
-          }
-          console.log("Right here: %j", info);
-          process.exit();
-        });
+          }).
+          catch( (err) => {
+            console.log("Error sending email: %j", err);
+            process.exit();
+          });
       }
 
     }).
