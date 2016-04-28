@@ -6,3 +6,6 @@ node_modules
 
 # Test data
 *.xlsx
+
+# Stuff we don't want committed
+config/mail.js

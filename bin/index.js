@@ -24,13 +24,7 @@ program.
   option('-r --recipients <recipients>', 'The emails to which the report should be delivered').
   parse(process.argv);
 
-var options = {
-  auth: {
-    api_key: ''
-  }
-};
-
-var transporter = nodemailer.createTransport(sgTransport(options));
+var transporter = nodemailer.createTransport(sgTransport(config.mail.options));
 
 const fileName = 'activity-' + program.today.toISOString() + '.xlsx';
 
