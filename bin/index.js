@@ -12,6 +12,7 @@ const workbook = require('../lib/workbook');
 const async = require('async');
 const dateFormat = require('dateformat');
 const email = require('../lib/email');
+const fs = require('fs');
 
 const DFormat = 'ddd dd-mmm-yyyy';
 
@@ -148,7 +149,10 @@ async.eachSeries(ranges, (range, cb) => {
         email.deliver(mailOptions).
           then( (info) => {
             console.log("Email sent: %j", info);
-            process.exit();
+            fs.unlink(fileName, (err) => {
+              if (err) { console.error(err) }
+              process.exit();
+            });
           }).
           catch( (err) => {
             console.log("Error sending email: %j", err);
