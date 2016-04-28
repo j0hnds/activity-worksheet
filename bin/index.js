@@ -137,7 +137,6 @@ async.eachSeries(ranges, (range, cb) => {
       workbook.writeFile(wb, fileName);
 
       if (program.recipients) {
-        console.log("Sending attachment");
         var mailOptions = {
           from: 'vault@bighornimaging.com',
           to: program.recipients.split(','),
@@ -155,11 +154,14 @@ async.eachSeries(ranges, (range, cb) => {
             console.log("Error sending email: %j", err);
             process.exit();
           });
+      } else {
+        process.exit();
       }
 
     }).
     catch( (err) => {
       console.error(err);
+      process.exit();
     });
 
 });
