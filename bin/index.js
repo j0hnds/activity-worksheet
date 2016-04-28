@@ -27,7 +27,7 @@ program.
 
 var options = {
   auth: {
-    api_key: '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'
+    api_key: ''
   }
 };
 
@@ -136,7 +136,7 @@ async.eachSeries(ranges, (range, cb) => {
       var ws_acctActivity = workbook.sheet_from_array_of_arrays(acctActivityData);
       var ws_weeklyActivity = workbook.sheet_from_array_of_arrays(weeklyActivityData);
 
-      /* add worksheet to workbook */
+      /* add worksheets to workbook */
       wb.SheetNames.push(ws_userActivityName);
       wb.Sheets[ws_userActivityName] = ws_userActivity;
 
@@ -146,7 +146,6 @@ async.eachSeries(ranges, (range, cb) => {
       wb.SheetNames.push(ws_weeklyActivityName);
       wb.Sheets[ws_weeklyActivityName] = ws_weeklyActivity;
 
-      /* write file */
       workbook.writeFile(wb, fileName);
 
       if (program.recipients) {
@@ -159,33 +158,17 @@ async.eachSeries(ranges, (range, cb) => {
           attachments: [ { path: fileName } ]
         };
 
-        console.log("The mail options: %j", mailOptions);
-
-        console.log("The transporter: %j", transporter);
-
-        console.log("sendMail: %j", typeof transporter.sendMail);
-
-        //transporter.sendMail(mailOptions).
-          //then( (info) => {
-            //console.log("Message: %j", info);
-            //process.exit();
-          //}).
-          //catch( (err) => {
-            //console.log("Error: %j", err);
-            //process.exit();
-          //});
         transporter.sendMail(mailOptions, function(err, info) {
           console.log("What the hell");
           if (err) {
             console.error("Right there: %j", err);
-            // process.exit();
+            process.exit();
           }
           console.log("Right here: %j", info);
-          // process.exit();
+          process.exit();
         });
       }
 
-      process.exit();
     }).
     catch( (err) => {
       console.error(err);
