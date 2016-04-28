@@ -10,12 +10,11 @@ require('../lib/bootstrap');
 const dateSVC = require('../lib/date-service');
 const workbook = require('../lib/workbook');
 const async = require('async');
-const support = require('../lib/support');
 const dateFormat = require('dateformat');
 
 // For mail
-var nodemailer = require('nodemailer');
-var sgTransport = require('nodemailer-sendgrid-transport');
+const nodemailer = require('nodemailer');
+const sgTransport = require('nodemailer-sendgrid-transport');
 
 const DFormat = 'ddd dd-mmm-yyyy';
 
