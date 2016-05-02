@@ -42,6 +42,9 @@ var ws_weeklyActivityName = "Weekly Activity";
 var userActivityData = [];
 var acctActivityData = [];
 var weeklyActivityData = [];
+const FmtDateRange = `${dateFormat(ranges[0].from, DFormat)} - ${dateFormat(ranges[6].from, DFormat)}`;
+
+console.log("Date range: %j", FmtDateRange);
 
 async.eachSeries(ranges, (range, cb) => {
 
@@ -141,8 +144,8 @@ async.eachSeries(ranges, (range, cb) => {
         var mailOptions = {
           from: 'vault@bighornimaging.com',
           to: program.recipients.split(','),
-          subject: "Activity report for ",
-          html: "<p>The activity report.</p>",
+          subject: "Activity report for " + FmtDateRange,
+          html: "<p>The activity report for the dates including " + FmtDateRange + " is attached.</p><p><strong>Do not reply to this email.</strong> It has been sent by the vault application server.</p>",
           attachments: [ { path: fileName } ]
         };
 
