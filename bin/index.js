@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+'use strict'
 
 /**
  * Invoke this to generate the activity spreadsheets.
@@ -6,12 +7,12 @@
 
 const program = require('commander')
 const mongoose = require('mongoose')
-require('../lib/bootstrap')
 const dateSVC = require('../lib/date-service')
 const workbook = require('../lib/workbook')
 const async = require('async')
 const dateFormat = require('dateformat')
 const email = require('../lib/email')
+const database = require('../config/database')
 const fs = require('fs')
 
 const DFormat = 'ddd dd-mmm-yyyy'
@@ -22,20 +23,20 @@ program
   .option('-r --recipients <recipients>', 'The emails to which the report should be delivered')
   .parse(process.argv)
 
-const fileName = 'activity-' + program.today.toISOString() + '.xlsx'
+const fileName = `activity-${program.today.toISOString()}.xlsx`
 
-mongoose.connect(global.config.database.url)
+mongoose.connect(database.url)
 
 const userActivity = require('../lib/user-activity')
 const acctActivity = require('../lib/account-activity')
 const weeklyActivity = require('../lib/weekly-activity')
 
-var ranges = dateSVC.pastWeekRanges(program.today)
+const ranges = dateSVC.pastWeekRanges(program.today)
 
 var wb = new workbook.Workbook()
-var wsUserActivityName = 'User Activity'
-var wsAcctActivityName = 'Account Activity'
-var wsWeeklyActivityName = 'Weekly Activity'
+const wsUserActivityName = 'User Activity'
+const wsAcctActivityName = 'Account Activity'
+const wsWeeklyActivityName = 'Weekly Activity'
 var userActivityData = []
 var acctActivityData = []
 var weeklyActivityData = []
@@ -54,7 +55,7 @@ async.eachSeries(ranges, (range, cb) => {
       userActivityData.push([ 'User', 'Login', 'Logout', 'Book View', 'Page View', 'Page PDF View', 'Page Download' ])
       return userActivity.processUserStats(gStats)
         .then((userStats) => {
-          for (var i in userStats) {
+          for (let i in userStats) {
             userActivityData.push([i,
                       userStats[i].login,
                       userStats[i].logout,
@@ -64,7 +65,6 @@ async.eachSeries(ranges, (range, cb) => {
                       userStats[i].pageDownload])
           }
           userActivityData.push([])
-          // cb()
         })
     })
     .then(() => {
@@ -74,7 +74,7 @@ async.eachSeries(ranges, (range, cb) => {
           acctActivityData.push([ 'Account', 'Login', 'Logout', 'Book View', 'Page View', 'Page PDF View', 'Page Download' ])
           return acctActivity.processAccountStats(gStats)
             .then((aStats) => {
-              for (var i in aStats) {
+              for (let i in aStats) {
                 acctActivityData.push([i,
                           aStats[i].login,
                           aStats[i].logout,
