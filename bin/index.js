@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-'use strict'
 
 /**
  * Invoke this to generate the activity spreadsheets.
@@ -44,7 +43,7 @@ const FmtDateRange = `${dateFormat(ranges[0].from, DFormat)} - ${dateFormat(rang
 
 console.log('Date range: %j', FmtDateRange)
 
-async.eachSeries(ranges, (range, cb) => {
+async.eachSeries(ranges, (range, rangesComplete) => {
   /**
    * We want to use the same range for both user groupings and
    * account groupings
@@ -54,39 +53,37 @@ async.eachSeries(ranges, (range, cb) => {
       userActivityData.push([ dateFormat(range.from, DFormat) ])
       userActivityData.push([ 'User', 'Login', 'Logout', 'Book View', 'Page View', 'Page PDF View', 'Page Download' ])
       return userActivity.processUserStats(gStats)
-        .then((userStats) => {
-          for (let i in userStats) {
-            userActivityData.push([i,
-                      userStats[i].login,
-                      userStats[i].logout,
-                      userStats[i].bookView,
-                      userStats[i].pageView,
-                      userStats[i].pdfView,
-                      userStats[i].pageDownload])
-          }
-          userActivityData.push([])
-        })
     })
-    .then(() => {
-      return acctActivity.groupByAccount(range.from, range.to)
-        .then((gStats) => {
-          acctActivityData.push([ dateFormat(range.from, DFormat) ])
-          acctActivityData.push([ 'Account', 'Login', 'Logout', 'Book View', 'Page View', 'Page PDF View', 'Page Download' ])
-          return acctActivity.processAccountStats(gStats)
-            .then((aStats) => {
-              for (let i in aStats) {
-                acctActivityData.push([i,
-                          aStats[i].login,
-                          aStats[i].logout,
-                          aStats[i].bookView,
-                          aStats[i].pageView,
-                          aStats[i].pdfView,
-                          aStats[i].pageDownload])
-              }
-              acctActivityData.push([])
-              cb() // Done with range...
-            })
-        })
+    .then((userStats) => {
+      for (let i in userStats) {
+        userActivityData.push([i,
+                  userStats[i].login,
+                  userStats[i].logout,
+                  userStats[i].bookView,
+                  userStats[i].pageView,
+                  userStats[i].pdfView,
+                  userStats[i].pageDownload])
+      }
+      userActivityData.push([])
+    })
+    .then(() => acctActivity.groupByAccount(range.from, range.to))
+    .then((gStats) => {
+      acctActivityData.push([ dateFormat(range.from, DFormat) ])
+      acctActivityData.push([ 'Account', 'Login', 'Logout', 'Book View', 'Page View', 'Page PDF View', 'Page Download' ])
+      return acctActivity.processAccountStats(gStats)
+    })
+    .then((aStats) => {
+      for (let i in aStats) {
+        acctActivityData.push([i,
+                  aStats[i].login,
+                  aStats[i].logout,
+                  aStats[i].bookView,
+                  aStats[i].pageView,
+                  aStats[i].pdfView,
+                  aStats[i].pageDownload])
+      }
+      acctActivityData.push([])
+      rangesComplete() // Done with range...
     })
     .catch((err) => {
       console.error(err)
@@ -99,22 +96,20 @@ async.eachSeries(ranges, (range, cb) => {
 
   // Now, do the weekly stuff
   weeklyActivity.groupByUser(ranges[0].from, ranges[6].to)
-    .then((wStats) => {
-      return weeklyActivity.processWeeklyStats(wStats)
-        .then((stats) => {
-          weeklyActivityData.push([ 'User', 'Book', 'County', 'Book View', 'Page View', 'Page PDF View', 'Page Download' ])
-          for (var i in stats) {
-            var fields = i.split(',')
-            weeklyActivityData.push([
-              fields[0],
-              fields[1],
-              fields[2],
-              stats[i].bookView,
-              stats[i].pageView,
-              stats[i].pdfView,
-              stats[i].pageDownload])
-          }
-        })
+    .then((wStats) => weeklyActivity.processWeeklyStats(wStats))
+    .then((stats) => {
+      weeklyActivityData.push([ 'User', 'Book', 'County', 'Book View', 'Page View', 'Page PDF View', 'Page Download' ])
+      for (var i in stats) {
+        var fields = i.split(',')
+        weeklyActivityData.push([
+          fields[0],
+          fields[1],
+          fields[2],
+          stats[i].bookView,
+          stats[i].pageView,
+          stats[i].pdfView,
+          stats[i].pageDownload])
+      }
     })
     .then(() => {
       var wsUserActivity = workbook.sheetFromArrayOfArrays(userActivityData)

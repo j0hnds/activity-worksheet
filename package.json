@@ -6,6 +6,10 @@
   "scripts": {
     "test": "tape test/**/*-test.js | faucet"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/j0hnds/activity-worksheet.git"
+  },
   "keywords": [
     "email",
     "activity",
