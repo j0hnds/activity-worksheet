@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+"use strict"
 
 /**
  * Invoke this to generate the activity spreadsheets.
@@ -32,13 +33,13 @@ const weeklyActivity = require('../lib/weekly-activity')
 
 const ranges = dateSVC.pastWeekRanges(program.today)
 
-var wb = new workbook.Workbook()
+const wb = new workbook.Workbook()
 const wsUserActivityName = 'User Activity'
 const wsAcctActivityName = 'Account Activity'
 const wsWeeklyActivityName = 'Weekly Activity'
-var userActivityData = []
-var acctActivityData = []
-var weeklyActivityData = []
+const userActivityData = []
+const acctActivityData = []
+const weeklyActivityData = []
 const FmtDateRange = `${dateFormat(ranges[0].from, DFormat)} - ${dateFormat(ranges[6].from, DFormat)}`
 
 console.log('Date range: %j', FmtDateRange)
@@ -99,8 +100,8 @@ async.eachSeries(ranges, (range, rangesComplete) => {
     .then((wStats) => weeklyActivity.processWeeklyStats(wStats))
     .then((stats) => {
       weeklyActivityData.push([ 'User', 'Book', 'County', 'Book View', 'Page View', 'Page PDF View', 'Page Download' ])
-      for (var i in stats) {
-        var fields = i.split(',')
+      for (let i in stats) {
+        let fields = i.split(',')
         weeklyActivityData.push([
           fields[0],
           fields[1],
@@ -112,9 +113,9 @@ async.eachSeries(ranges, (range, rangesComplete) => {
       }
     })
     .then(() => {
-      var wsUserActivity = workbook.sheetFromArrayOfArrays(userActivityData)
-      var wsAcctActivity = workbook.sheetFromArrayOfArrays(acctActivityData)
-      var wsWeeklyActivity = workbook.sheetFromArrayOfArrays(weeklyActivityData)
+      let wsUserActivity = workbook.sheetFromArrayOfArrays(userActivityData)
+      let wsAcctActivity = workbook.sheetFromArrayOfArrays(acctActivityData)
+      let wsWeeklyActivity = workbook.sheetFromArrayOfArrays(weeklyActivityData)
 
       /* add worksheets to workbook */
       wb.SheetNames.push(wsUserActivityName)
@@ -129,7 +130,7 @@ async.eachSeries(ranges, (range, rangesComplete) => {
       workbook.writeFile(wb, fileName)
 
       if (program.recipients) {
-        var mailOptions = {
+        let mailOptions = {
           from: 'vault@bighornimaging.com',
           to: program.recipients.split(','),
           subject: 'Activity report for ' + FmtDateRange,
@@ -141,7 +142,7 @@ async.eachSeries(ranges, (range, rangesComplete) => {
           .then((info) => {
             console.log('Email sent: %j', info)
             fs.unlink(fileName, (err) => {
-              if (err) { console.error(err) }
+              if (err) console.error(err)
               process.exit()
             })
           })
