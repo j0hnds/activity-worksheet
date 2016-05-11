@@ -21,6 +21,7 @@ program
   .version('1.0.0')
   .option('-t --today <today>', 'The value to use for today', dateSVC.parseDate, new Date())
   .option('-r --recipients <recipients>', 'The emails to which the report should be delivered')
+  .option('-c --clear', 'Clear the created file')
   .parse(process.argv)
 
 const fileName = `activity-${program.today.toISOString()}.xlsx`
@@ -44,7 +45,7 @@ const FmtDateRange = `${dateFormat(ranges[0].from, DFormat)} - ${dateFormat(rang
 
 console.log('Date range: %j', FmtDateRange)
 
-async.eachSeries(ranges, (range, rangesComplete) => {
+async.eachSeries(ranges, (range, rangeComplete) => {
   /**
    * We want to use the same range for both user groupings and
    * account groupings
@@ -84,7 +85,7 @@ async.eachSeries(ranges, (range, rangesComplete) => {
                   aStats[i].pageDownload])
       }
       acctActivityData.push([])
-      rangesComplete() // Done with range...
+      rangeComplete() // Done with range...
     })
     .catch((err) => {
       console.error(err)
@@ -151,7 +152,13 @@ async.eachSeries(ranges, (range, rangesComplete) => {
             process.exit()
           })
       } else {
-        process.exit()
+        if (program.clear) {
+          fs.unlink(fileName, (err) => {
+            if (err) console.error(err)
+            process.exit()
+          })
+        } else
+          process.exit()
       }
     })
     .catch((err) => {
