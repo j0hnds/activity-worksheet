@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-"use strict"
+'use strict'
 
 /**
  * Invoke this to generate the activity spreadsheets.
@@ -19,7 +19,7 @@ const DFormat = 'ddd dd-mmm-yyyy'
 
 program
   .version('1.0.0')
-  .option('-t --today <today>', 'The value to use for today', dateSVC.parseDate, new Date())
+  .option('-t --today <today>', 'The value to use for today', dateSVC.parseDate, dateSVC.today())
   .option('-r --recipients <recipients>', 'The emails to which the report should be delivered')
   .option('-c --clear', 'Clear the created file')
   .parse(process.argv)
@@ -41,7 +41,7 @@ const wsWeeklyActivityName = 'Weekly Activity'
 const userActivityData = []
 const acctActivityData = []
 const weeklyActivityData = []
-const FmtDateRange = `${dateFormat(ranges[0].from, DFormat)} - ${dateFormat(ranges[6].from, DFormat)}`
+const FmtDateRange = `${dateFormat(ranges[0].startDate, DFormat)} - ${dateFormat(ranges[6].startDate, DFormat)}`
 
 console.log('Date range: %j', FmtDateRange)
 
@@ -50,9 +50,9 @@ async.eachSeries(ranges, (range, rangeComplete) => {
    * We want to use the same range for both user groupings and
    * account groupings
    */
-  userActivity.groupByUser(range.from, range.to)
+  userActivity.groupByUser(range.startDate.toDate(), range.endDate.toDate())
     .then((gStats) => {
-      userActivityData.push([ dateFormat(range.from, DFormat) ])
+      userActivityData.push([ dateFormat(range.startDate, DFormat) ])
       userActivityData.push([ 'User', 'Login', 'Logout', 'Book View', 'Page View', 'Page PDF View', 'Page Download' ])
       return userActivity.processUserStats(gStats)
     })
@@ -68,9 +68,9 @@ async.eachSeries(ranges, (range, rangeComplete) => {
       }
       userActivityData.push([])
     })
-    .then(() => acctActivity.groupByAccount(range.from, range.to))
+    .then(() => acctActivity.groupByAccount(range.startDate.toDate(), range.endDate.toDate()))
     .then((gStats) => {
-      acctActivityData.push([ dateFormat(range.from, DFormat) ])
+      acctActivityData.push([ dateFormat(range.startDate.toDate(), DFormat) ])
       acctActivityData.push([ 'Account', 'Login', 'Logout', 'Book View', 'Page View', 'Page PDF View', 'Page Download' ])
       return acctActivity.processAccountStats(gStats)
     })
@@ -97,7 +97,7 @@ async.eachSeries(ranges, (range, rangeComplete) => {
   }
 
   // Now, do the weekly stuff
-  weeklyActivity.groupByUser(ranges[0].from, ranges[6].to)
+  weeklyActivity.groupByUser(ranges[0].startDate.toDate(), ranges[6].endDate.toDate())
     .then((wStats) => weeklyActivity.processWeeklyStats(wStats))
     .then((stats) => {
       weeklyActivityData.push([ 'User', 'Book', 'County', 'Book View', 'Page View', 'Page PDF View', 'Page Download' ])
@@ -157,8 +157,9 @@ async.eachSeries(ranges, (range, rangeComplete) => {
             if (err) console.error(err)
             process.exit()
           })
-        } else
+        } else {
           process.exit()
+        }
       }
     })
     .catch((err) => {
