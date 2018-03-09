@@ -55,12 +55,13 @@ async.eachSeries(ranges, (range, cb) => {
   userActivity.groupByUser(range.from, range.to).
     then( (gStats) => { 
 
-      // userActivityData.push([ dateFormat(range.from, DFormat) ]); 
-      userActivityData.push([ "Date", "User","Login","Logout","Book View","Page View", "Page PDF View","Page Download" ] );
+      console.log('Grouped by user...')
+      userActivityData.push([ dateFormat(range.from, DFormat) ]); 
+      userActivityData.push([ "User","Login","Logout","Book View","Page View", "Page PDF View","Page Download" ] );
       return userActivity.processUserStats(gStats).
         then( (userStats) => {
           for (var i in userStats) {
-            userActivityData.push([dateFormat(range.from, DFormat), i, 
+            userActivityData.push([i, 
                       userStats[i].login, 
                       userStats[i].logout, 
                       userStats[i].bookView, 
@@ -75,6 +76,7 @@ async.eachSeries(ranges, (range, cb) => {
     then( () => {
       return acctActivity.groupByAccount(range.from, range.to).
         then( (gStats) => {
+          console.log('Grouped by account')
           acctActivityData.push([ dateFormat(range.from, DFormat) ]); 
           acctActivityData.push([ "Account","Login","Logout","Book View","Page View", "Page PDF View","Page Download" ] );
           return acctActivity.processAccountStats(gStats).
@@ -106,8 +108,10 @@ async.eachSeries(ranges, (range, cb) => {
   // Now, do the weekly stuff
   weeklyActivity.groupByUser(ranges[0].from, ranges[6].to).
     then( (wStats) => {
+      console.log('Weekly stats')
       return weeklyActivity.processWeeklyStats(wStats).
         then( (stats) => {
+          console.log('Processed weekly stats')
           weeklyActivityData.push(["User","Book","County","Book View","Page View","Page PDF View","Page Download" ]);
           for (var i in stats) {
             var fields = i.split(',');
@@ -120,10 +124,11 @@ async.eachSeries(ranges, (range, cb) => {
               stats[i].pdfView,
               stats[i].pageDownload]);
           }
-
+          console.log('Done processing weeklies')
         });
     }).
     then( () => {
+      console.log('Building spreadsheet...')
       var ws_userActivity = workbook.sheet_from_array_of_arrays(userActivityData);
       var ws_acctActivity = workbook.sheet_from_array_of_arrays(acctActivityData);
       var ws_weeklyActivity = workbook.sheet_from_array_of_arrays(weeklyActivityData);
@@ -139,6 +144,7 @@ async.eachSeries(ranges, (range, cb) => {
       wb.Sheets[ws_weeklyActivityName] = ws_weeklyActivity;
 
       workbook.writeFile(wb, fileName);
+      console.log('Writing spreadsheet')
 
       if (program.recipients) {
         var mailOptions = {
@@ -149,6 +155,7 @@ async.eachSeries(ranges, (range, cb) => {
           attachments: [ { path: fileName } ]
         };
 
+        console.log('Fixing to deliver email')
         email.deliver(mailOptions).
           then( (info) => {
             console.log("Email sent: %j", info);

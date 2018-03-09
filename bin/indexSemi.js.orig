@@ -24,8 +24,8 @@ program.
 
 const fileName = 'semi-activity-' + program.today.toISOString() + '.xlsx';
 
-const RangeStart = new Date(Date.UTC(2017, 0, 1, 7, 0, 0));
-const RangeEnd = new Date(Date.UTC(2018, 0, 1, 7, 0, 0));
+const RangeStart = new Date(Date.UTC(2015, 9, 1, 7, 0, 0));
+const RangeEnd = new Date(Date.UTC(2017, 2, 1, 7, 0, 0));
 
 mongoose.connect(config.database.url);
 

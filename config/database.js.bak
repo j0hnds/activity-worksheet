@@ -6,7 +6,7 @@ module.exports = ( () => {
   mongoose.Promise = global.Promise;
 
   var mod = {
-    url: "mongodb://titleCloudApp:4!wHnmcj!f8FFkHb$$WV9JEGX&qe@dv-mongo-a:27017,dv-mongo-b:27017/titleCloud?replicaSet=rs0"
+    url: "mongodb://titleCloudApp:4!wHnmcj!f8FFkHb$$WV9JEGX&qe@dv-mongo-a:27017/titleCloud"
   };
 
   return mod;

@@ -55,12 +55,12 @@ async.eachSeries(ranges, (range, cb) => {
   userActivity.groupByUser(range.from, range.to).
     then( (gStats) => { 
 
-      // userActivityData.push([ dateFormat(range.from, DFormat) ]); 
-      userActivityData.push([ "Date", "User","Login","Logout","Book View","Page View", "Page PDF View","Page Download" ] );
+      userActivityData.push([ dateFormat(range.from, DFormat) ]); 
+      userActivityData.push([ "User","Login","Logout","Book View","Page View", "Page PDF View","Page Download" ] );
       return userActivity.processUserStats(gStats).
         then( (userStats) => {
           for (var i in userStats) {
-            userActivityData.push([dateFormat(range.from, DFormat), i, 
+            userActivityData.push([i, 
                       userStats[i].login, 
                       userStats[i].logout, 
                       userStats[i].bookView, 

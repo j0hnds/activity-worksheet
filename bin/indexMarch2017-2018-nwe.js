@@ -22,10 +22,10 @@ program.
   option('-r --recipients <recipients>', 'The emails to which the report should be delivered').
   parse(process.argv);
 
-const fileName = 'semi-activity-' + program.today.toISOString() + '.xlsx';
+const fileName = 'semi-activity-nw-' + program.today.toISOString() + '.xlsx';
 
-const RangeStart = new Date(Date.UTC(2017, 0, 1, 7, 0, 0));
-const RangeEnd = new Date(Date.UTC(2018, 0, 1, 7, 0, 0));
+const RangeStart = new Date(Date.UTC(2017, 2, 1, 7, 0, 0));
+const RangeEnd = new Date(Date.UTC(2018, 2, 4, 7, 0, 0));
 
 mongoose.connect(config.database.url);
 
@@ -47,7 +47,7 @@ console.log("Date range: %j", FmtDateRange);
  * We want to use the same range for both user groupings and 
  * account groupings
  */
-userActivity.groupByUser(RangeStart, RangeEnd).
+userActivity.groupByUserWOWeekend(RangeStart, RangeEnd).
   then( (gStats) => { 
 
     userActivityData.push([ dateFormat(RangeStart, DFormat) ]); 
@@ -68,7 +68,7 @@ userActivity.groupByUser(RangeStart, RangeEnd).
       });
   }).
   then( () => {
-    return acctActivity.groupByAccount(RangeStart, RangeEnd).
+    return acctActivity.groupByAccountWOWeekend(RangeStart, RangeEnd).
       then( (gStats) => {
         acctActivityData.push([ dateFormat(RangeStart, DFormat) ]); 
         acctActivityData.push([ "Account","Login","Logout","Book View","Page View", "Page PDF View","Page Download" ] );
@@ -105,7 +105,7 @@ userActivity.groupByUser(RangeStart, RangeEnd).
       var mailOptions = {
         from: 'vault@bighornimaging.com',
         to: program.recipients.split(','),
-        subject: "Activity report for " + FmtDateRange,
+        subject: "New NOWeekend Activity report for " + FmtDateRange,
         html: "<p>The activity report for the dates including " + FmtDateRange + " is attached.</p><p><strong>Do not reply to this email.</strong> It has been sent by the vault application server.</p>",
         attachments: [ { path: fileName } ]
       };
