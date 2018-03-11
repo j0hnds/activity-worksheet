@@ -9,9 +9,9 @@ require('../lib/bootstrap');
 
 // 2 months completed
 const DFormat = 'ddd dd-mmm-yyyy';
-const RangeStart = new Date(Date.UTC(2017, 2, 1, 7, 0, 0));
+const RangeStart = new Date(Date.UTC(2018, 2, 10, 7, 0, 0));
 // const RangeStart = new Date(Date.UTC(2017, 2, 1, 7, 0, 0));
-const RangeEnd = new Date(Date.UTC(2018, 2, 4, 7, 0, 0));
+const RangeEnd = new Date(Date.UTC(2018, 2, 12, 7, 0, 0));
 
 mongoose.connect(config.database.url);
 
