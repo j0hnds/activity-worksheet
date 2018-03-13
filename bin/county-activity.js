@@ -30,7 +30,9 @@ mongoose.connect(config.database.url);
 const dbAccess = require('../lib/db-access')
 const filterSVC = require('../lib/filter-utils')
 
-const range = dateSVC.dayRange(program.today);
+let startDate = program.today
+startDate.setUTCHours(startDate.getUTCHours() - 24)
+const range = dateSVC.dayRange(startDate);
 
 const FmtDateRange = `${dateFormat(range.startDate, DFormat)} - ${dateFormat(range.endDate, DFormat)}`;
 
